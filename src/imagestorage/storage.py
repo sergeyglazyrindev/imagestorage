@@ -33,10 +33,13 @@ class S3ImageStorage(BaseStorage):
             raise ImageStoreOriginError('Error while storing origin image')
         return self.__image_url('origin')
 
-    def get_requested_image(self, image_url):
+    def get_requested_image(self, image_url_or_tuple):
         if not self.is_configured:
             return
-        size_tuple = self._get_size_tuple_from_image_url(image_url)
+        if isinstance(image_url_or_tuple, (tuple, list)):
+            size_tuple = image_url_or_tuple
+        else:
+            size_tuple = self._get_size_tuple_from_image_url(image_url_or_tuple)
         requesting_image_url = self.__image_url(size_tuple)
         if self._image_is_available(requesting_image_url):
             return self.webengine.permanent_redirect(requesting_image_url)
@@ -73,7 +76,7 @@ class S3ImageStorage(BaseStorage):
     def s3_parts(self):
         return urlparse(self.bucket_base_path)
 
-    def configure(self, tokens, bucket, base_path, bucket_base_path):
+    def configure(self, tokens, bucket, bucket_base_path, base_path='/'):
         self.tokens = tokens
         self.bucket = bucket
         self.base_path = base_path

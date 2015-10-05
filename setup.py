@@ -33,6 +33,6 @@ setup(
         'testing': ['nose', 'mock'],
     },
     test_suite='tests',
-    install_requires=['boto==2.38.0', 'Pillow==2.9.0', 'celery==3.1.18', 'requests==2.7.0',
+    install_requires=['boto3==1.1.4', 'Pillow==2.9.0', 'celery==3.1.18', 'requests==2.7.0',
                       'python3-memcached==1.51']
 )

@@ -41,11 +41,15 @@ class S3ImageStorage(BaseStorage):
         else:
             size_tuple = self._get_size_tuple_from_image_url(image_url_or_tuple)
         requesting_image_url = self.__image_url(size_tuple)
-        if self._image_is_available(requesting_image_url):
+        image_key = self.__get_image_key(size_tuple)
+        avail_image_key = image_key + '_avail'
+        is_available_image = self.mc.get(avail_image_key)
+        if is_available_image or self._image_is_available(requesting_image_url):
+            if not is_available_image:
+                self.mc.set(avail_image_key, 1)
             return self.webengine.permanent_redirect(requesting_image_url)
         pil_image = self._get_image_from_url(self.__image_url('origin'))
         self._resize_image(pil_image, size_tuple)
-        image_key = self.__get_image_key(size_tuple)
         if self.mc.add(image_key, 1, time=60):
             s3_store_image.delay(pil_image, self.tokens, self.bucket, image_key)
         return self.webengine.image_response(pil_image)

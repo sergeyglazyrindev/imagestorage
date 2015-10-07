@@ -9,7 +9,8 @@ from src.imagestorage.adapters import get_adapter_for_webengine
 class TestTask(TestCase):
 
     def setUp(self):
-        self.image = Image.open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg')))
+        fp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg'))
+        self.image = Image.open(fp)
 
     @mock.patch('src.imagestorage.adapters.wheezy.wheezy.http')
     def test_wheezy(self, patched_wheezy):

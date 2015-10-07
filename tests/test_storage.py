@@ -9,7 +9,6 @@ from src.imagestorage import storage as imagestorage
 class TestTask(TestCase):
 
     @mock.patch('src.imagestorage.base.requests')
-    @mock.patch('src.imagestorage.base.memcache')
     @mock.patch('src.imagestorage.adapters.wheezy.wheezy.http')
     @mock.patch('src.imagestorage.storage.s3_store_image')
     def test(self, mocked_task, patched_wheezy, *args):
@@ -24,7 +23,9 @@ class TestTask(TestCase):
         storage.configure_webengine('wheezy')
         storage.configure_memcache(['127.0.0.1:11211'])
         image = Image.open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg')))
-        with mock.patch.object(storage, '_get_image_from_url') as mocked_object:
+        with mock.patch.object(storage, '_get_image_from_url') as mocked_object,\
+                mock.patch.object(storage, 'mc') as memcache_mocked:
+            memcache_mocked.get.return_value = False
             mocked_object.return_value = image
             storage.store_origin(
                 'https://encrypted-tbn2.gstatic.com/images?q='

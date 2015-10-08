@@ -10,7 +10,13 @@ Example of the code worth million words:
 .. code-block:: python
 
     from imagestorage import storage
+    from imagestorage.resources_broker import resource_broker
+    import memcache
     from celery import app
+
+    resource_broker.register('cache_service', memcache.Client(['127.0.0.1:11211']))
+    resource_broker.register('webengine', 'wheezy')
+    resource_broker.register('s3', 'bucket_name', aws_access_key_id='dsadasd', aws_secret_access_key='dsasda', region_name='eu-central-1')
 
     # storage.s3_store_image should be celery task, so let's patch it
     # in production environments you may decide to use CELERY_ROUTES
@@ -22,22 +28,13 @@ Example of the code worth million words:
     # later, we will use this image_id to build proper links to images
     storage = storage.S3ImageStorage(image_id, 'jpg')
 
-    # please pass s3 tokens to storage
-    # testimagestorageforpippackage - bucket_name
     # s3 base path - https://s3.eu-central-1.amazonaws.com/testimagestorageforpippackage/
     # '/' - base path upload image to
     # uploaded url would be: s3_base_path + base_path + image_id + '/' + (size_tuple or 'origin') + image_ext
     storage.configure(
-        {'access_key': 'access_key', 'secret_key': 'secret_key'},
-        'testimagestorageforpippackage',
         'https://s3.eu-central-1.amazonaws.com/testimagestorageforpippackage/',
         '/'
     )
-    # pass webengine you would like to use to get image responses, permanent redirects, etc
-    storage.configure_webengine('wheezy')
-
-    # configure memcache by passing hosts for memcache
-    storage.configure_memcache(['127.0.0.1:11211'])
 
     # when you call this method, we download image from specified url
     # make a thumbnail with specific dimensions (using Pillow thumbnail method)

@@ -10,8 +10,6 @@ from .resources_broker import resource_broker
 class S3ImageStorage(BaseStorage):
 
     image_id = None
-    tokens = None
-    bucket = None
     base_path = None
     is_configured = False
     domain = None
@@ -49,7 +47,7 @@ class S3ImageStorage(BaseStorage):
         pil_image = self._get_image_from_url(self.__image_url('origin'))
         self._resize_image(pil_image, size_tuple)
         if cache_service.add(image_key, 1, time=60):
-            s3_store_image.delay(pil_image, self.tokens, self.bucket, image_key)
+            s3_store_image.delay(pil_image, image_key)
         return resource_broker['webengine'].image_response(pil_image)
 
     def _image_is_available(self, image_url):

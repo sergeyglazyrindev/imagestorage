@@ -1,17 +1,14 @@
-import boto3
 import botocore
 import tempfile
 
+from .resources_broker import resource_broker
 
-def s3_store_image(pil_image, tokens, bucket, s3_key):
 
-    session = boto3.session.Session(aws_access_key_id=tokens['access_key'],
-                                    aws_secret_access_key=tokens['secret_key'],
-                                    region_name='eu-central-1')
-    s3 = session.resource('s3')
+def s3_store_image(pil_image, s3_key):
+
     if s3_key.startswith('/'):
         s3_key = s3_key[1:]
-    _object = s3.Object(bucket, s3_key)
+    _object = resource_broker['s3'](s3_key)
     try:
         if _object.get():
             return

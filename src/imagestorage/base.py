@@ -1,16 +1,17 @@
-import memcache
 from urllib.parse import urlparse, parse_qs
 from PIL import Image
 import io
 import requests
 
-from .adapters import get_adapter_for_webengine
 from .helpers import size_string_to_tuple
 from .exceptions import ImageNotFound
-from .decorators import cached_property
 
 
 class BaseStorage():
+
+    def __init__(self, image_id, image_ext):
+        self.image_id = image_id
+        self.image_ext = image_ext
 
     def get_requested_image(self, image_url):
         raise NotImplementedError
@@ -29,17 +30,7 @@ class BaseStorage():
     def store_origin(self, image_url, origin_size):
         raise NotImplementedError
 
-    def configure_webengine(self, webengine):
-        self._webengine = webengine
-
-    @cached_property
-    def webengine(self):
-        return get_adapter_for_webengine(self._webengine)
-
     def _resize_image(self, pil_image, size_tuple):
         if isinstance(size_tuple, str):
             size_tuple = size_string_to_tuple(size_tuple)
         pil_image.thumbnail(size_tuple)
-
-    def configure_memcache(self, hosts):
-        self.mc = memcache.Client(hosts, debug=0)

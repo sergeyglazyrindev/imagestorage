@@ -4,6 +4,7 @@ from urllib.parse import urlunparse, urlparse
 from .base import BaseStorage
 from .tasks import s3_store_image
 from .exceptions import ImageStoreOriginError
+from .resources_broker import resource_broker
 
 
 class S3ImageStorage(BaseStorage):
@@ -17,17 +18,13 @@ class S3ImageStorage(BaseStorage):
     image_ext = None
     bucket_base_path = None
 
-    def __init__(self, image_id, image_ext):
-        self.image_id = image_id
-        self.image_ext = image_ext
-
     def store_origin(self, image_url, origin_size):
         if not self.is_configured:
             return
         pil_image = self._get_image_from_url(image_url)
         self._resize_image(pil_image, origin_size)
         success = s3_store_image.apply_async(args=(
-            pil_image, self.tokens, self.bucket, self.__get_image_key('origin'))
+            pil_image, self.__get_image_key('origin'))
         ).wait(timeout=10, interval=0.1)
         if not success:
             raise ImageStoreOriginError('Error while storing origin image')
@@ -43,16 +40,17 @@ class S3ImageStorage(BaseStorage):
         requesting_image_url = self.__image_url(size_tuple)
         image_key = self.__get_image_key(size_tuple)
         avail_image_key = image_key + '_avail'
-        is_available_image = self.mc.get(avail_image_key)
+        cache_service = resource_broker['cache_service']
+        is_available_image = cache_service.get(avail_image_key)
         if is_available_image or self._image_is_available(requesting_image_url):
             if not is_available_image:
-                self.mc.set(avail_image_key, 1)
-            return self.webengine.permanent_redirect(requesting_image_url)
+                cache_service.set(avail_image_key, 1)
+            return resource_broker['webengine'].permanent_redirect(requesting_image_url)
         pil_image = self._get_image_from_url(self.__image_url('origin'))
         self._resize_image(pil_image, size_tuple)
-        if self.mc.add(image_key, 1, time=60):
+        if cache_service.add(image_key, 1, time=60):
             s3_store_image.delay(pil_image, self.tokens, self.bucket, image_key)
-        return self.webengine.image_response(pil_image)
+        return resource_broker['webengine'].image_response(pil_image)
 
     def _image_is_available(self, image_url):
         return bool(requests.head(image_url).status_code == 200)
@@ -80,9 +78,7 @@ class S3ImageStorage(BaseStorage):
     def s3_parts(self):
         return urlparse(self.bucket_base_path)
 
-    def configure(self, tokens, bucket, bucket_base_path, base_path='/'):
-        self.tokens = tokens
-        self.bucket = bucket
+    def configure(self, bucket_base_path, base_path='/'):
         self.base_path = base_path
         self.bucket_base_path = bucket_base_path
         self.is_configured = True

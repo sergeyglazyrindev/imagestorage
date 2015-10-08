@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from PIL import Image
 from src.imagestorage import storage as imagestorage
+from src.imagestorage.resources_broker import resource_broker
 
 
 class TestTask(TestCase):
@@ -14,17 +15,17 @@ class TestTask(TestCase):
     def test(self, mocked_task, patched_wheezy, *args):
         mocked_task.return_value = mock.MagicMock()
         storage = imagestorage.S3ImageStorage(101, 'jpg')
+        resource_broker.register('s3', 'testimagestorage', aws_access_key_id='dsadasd', aws_secret_access_key='dsasda',
+                                 region_name='eu-central-1')
+        memcache_mocked = mock.MagicMock()
+        resource_broker.register('cache_service', memcache_mocked)
+        resource_broker.register('webengine', 'wheezy')
         storage.configure(
-            {'access_key': 'dsadas', 'secret_key': 'eqweqw'},
-            'testimagestorageforpippackage',
             'https://s3.eu-central-1.amazonaws.com/testimagestorageforpippackage/',
             '/',
         )
-        storage.configure_webengine('wheezy')
-        storage.configure_memcache(['127.0.0.1:11211'])
         image = Image.open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg')))
-        with mock.patch.object(storage, '_get_image_from_url') as mocked_object,\
-                mock.patch.object(storage, 'mc') as memcache_mocked:
+        with mock.patch.object(storage, '_get_image_from_url') as mocked_object:
             memcache_mocked.get.return_value = False
             mocked_object.return_value = image
             storage.store_origin(

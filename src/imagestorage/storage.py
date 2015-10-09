@@ -4,7 +4,6 @@ from urllib.parse import urlunparse, urlparse
 from .base import BaseStorage
 from .tasks import s3_store_image
 from .exceptions import ImageStoreOriginError
-from .resources_broker import resource_broker
 
 
 class S3ImageStorage(BaseStorage):
@@ -38,17 +37,17 @@ class S3ImageStorage(BaseStorage):
         requesting_image_url = self.__image_url(size_tuple)
         image_key = self.__get_image_key(size_tuple)
         avail_image_key = image_key + '_avail'
-        cache_service = resource_broker['cache_service']
+        cache_service = self.mc
         is_available_image = cache_service.get(avail_image_key)
         if is_available_image or self._image_is_available(requesting_image_url):
             if not is_available_image:
                 cache_service.set(avail_image_key, 1)
-            return resource_broker['webengine'].permanent_redirect(requesting_image_url)
+            return self.webengine.permanent_redirect(requesting_image_url)
         pil_image = self._get_image_from_url(self.__image_url('origin'))
         self._resize_image(pil_image, size_tuple)
         if cache_service.add(image_key, 1, time=60):
             s3_store_image.delay(pil_image, image_key)
-        return resource_broker['webengine'].image_response(pil_image)
+        return self.webengine.image_response(pil_image)
 
     def _image_is_available(self, image_url):
         return bool(requests.head(image_url).status_code == 200)

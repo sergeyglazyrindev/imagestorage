@@ -33,3 +33,25 @@ class ResourceBroker(object):
         return self.resources[resource]
 
 resource_broker = ResourceBroker()
+
+
+class ResourceResolver(object):
+
+    name = None
+
+    def __init__(self, name):
+        self.name = name
+
+    def __getitem__(self, key):
+        return self.__resource[key]
+
+    @property
+    def __resource(self):
+        return resource_broker[self.name]
+
+    def __getattr__(self, name):
+        return getattr(self.__resource, name)
+
+    def __call__(self, *args, **kwargs):
+        resource = self.__resource
+        return resource(*args, **kwargs)

@@ -1,14 +1,14 @@
 import botocore
 import tempfile
 
-from .resources_broker import resource_broker
+from .resources_broker import ResourceResolver
 
 
 def s3_store_image(pil_image, s3_key):
 
     if s3_key.startswith('/'):
         s3_key = s3_key[1:]
-    _object = resource_broker['s3'](s3_key)
+    _object = ResourceResolver('s3')(s3_key)
     try:
         if _object.get():
             return

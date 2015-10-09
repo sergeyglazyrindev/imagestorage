@@ -5,9 +5,13 @@ import requests
 
 from .helpers import size_string_to_tuple
 from .exceptions import ImageNotFound
+from .resources_broker import ResourceResolver
 
 
 class BaseStorage():
+
+    mc = ResourceResolver('cache_service')
+    webengine = ResourceResolver('webengine')
 
     def __init__(self, image_id, image_ext):
         self.image_id = image_id

@@ -1,3 +1,4 @@
+import os
 import requests
 from urllib.parse import urlunparse, urlparse
 
@@ -8,22 +9,21 @@ from .exceptions import ImageStoreOriginError
 
 class Bucket(object):
 
-    def __init__(self, base_path):
+    __slots__ = ('bucket_base_path', 'base_path')
+
+    def __init__(self, bucket_base_path, base_path='/'):
+        self.bucket_base_path = bucket_base_path
         self.base_path = base_path
 
 
 class S3ImageStorage(BaseStorage):
 
     image_id = None
-    base_path = None
-    is_configured = False
     domain = None
     image_ext = None
     bucket = None
 
     def store_origin_from_url(self, image_url, origin_size):
-        if not self.is_configured:
-            return
         pil_image = self._get_image_from_url(image_url)
         return self._store_origin(pil_image, origin_size)
 
@@ -37,13 +37,9 @@ class S3ImageStorage(BaseStorage):
         return self.__image_url('origin')
 
     def store_origin_from_file(self, pil_image, origin_size):
-        if not self.is_configured:
-            return
         return self._store_origin(pil_image, origin_size)
 
     def get_requested_image(self, image_url_or_tuple):
-        if not self.is_configured:
-            return
         if isinstance(image_url_or_tuple, (tuple, list)):
             size_tuple = image_url_or_tuple
         else:
@@ -68,10 +64,11 @@ class S3ImageStorage(BaseStorage):
 
     def __image_url(self, size_tuple):
         s3_parts = self.s3_parts
+        path = os.path.join(s3_parts.path, self.bucket.base_path)
         return urlunparse((
             s3_parts.scheme,
             s3_parts.netloc,
-            s3_parts.path + self.__get_image_key(size_tuple),
+            path + self.__get_image_key(size_tuple),
             '',
             '',
             ''
@@ -87,12 +84,8 @@ class S3ImageStorage(BaseStorage):
 
     @property
     def s3_parts(self):
-        return urlparse(self.bucket.base_path)
+        return urlparse(self.bucket.bucket_base_path)
 
     @classmethod
     def use_bucket(cls, bucket):
         cls.bucket = bucket
-
-    def configure(self, base_path='/'):
-        self.base_path = base_path
-        self.is_configured = True

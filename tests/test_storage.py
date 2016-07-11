@@ -24,9 +24,6 @@ class TestTask(TestCase):
         memcache_mocked = mock.MagicMock()
         resource_broker.register('cache_service', memcache_mocked)
         resource_broker.register('webengine', 'wheezy')
-        storage.configure(
-            '/'
-        )
         image = Image.open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg')))
         with mock.patch.object(storage, '_get_image_from_url') as mocked_object:
             memcache_mocked.get.return_value = False

@@ -1,4 +1,3 @@
-import os
 import requests
 from urllib.parse import urlunparse, urlparse
 
@@ -64,7 +63,7 @@ class S3ImageStorage(BaseStorage):
 
     def __image_url(self, size_tuple):
         s3_parts = self.s3_parts
-        path = os.path.join(s3_parts.path, self.bucket.base_path)
+        path = s3_parts.path
         return urlunparse((
             s3_parts.scheme,
             s3_parts.netloc,

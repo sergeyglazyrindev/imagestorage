@@ -80,7 +80,7 @@ class S3ImageStorage(BaseStorage):
         else:
             size_tuple = map(str, filter(None, size_tuple))
             size_tuple_part = 'x'.join(size_tuple)
-        return str(self.image_id) + '/' + size_tuple_part + '.' + self.image_ext
+        return self.bucket.base_path + str(self.image_id) + '/' + size_tuple_part + '.' + self.image_ext
 
     @property
     def s3_parts(self):

@@ -31,7 +31,10 @@ class BaseStorage():
             raise ImageNotFound('Couldn\'t download image from {}'.format(image_url))
         return Image.open(io.BytesIO(image_string))
 
-    def store_origin(self, image_url, origin_size):
+    def store_origin_from_url(self, image_url, origin_size):
+        raise NotImplementedError
+
+    def store_origin_from_file(self, pil_image, origin_size):
         raise NotImplementedError
 
     def _resize_image(self, pil_image, size_tuple):

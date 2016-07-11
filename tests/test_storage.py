@@ -28,9 +28,8 @@ class TestTask(TestCase):
         with mock.patch.object(storage, '_get_image_from_url') as mocked_object:
             memcache_mocked.get.return_value = False
             mocked_object.return_value = image
-            storage.store_origin(
-                'https://encrypted-tbn2.gstatic.com/images?q='
-                'tbn:ANd9GcQUIfplgoueTfSX1A3UnJtMEy0xMqJJ5ECirkASkw3xT7R81WrJ',
+            storage.store_origin_from_file(
+                image,
                 '4000x4000'
             )
             mock_to_compare = mock.MagicMock()

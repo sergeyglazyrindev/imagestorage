@@ -15,10 +15,13 @@ class S3ImageStorage(BaseStorage):
     image_ext = None
     bucket_base_path = None
 
-    def store_origin(self, image_url, origin_size):
+    def store_origin_from_url(self, image_url, origin_size):
         if not self.is_configured:
             return
         pil_image = self._get_image_from_url(image_url)
+        return self._store_origin(pil_image, origin_size)
+
+    def _store_origin(self, pil_image, origin_size):
         self._resize_image(pil_image, origin_size)
         success = s3_store_image.apply_async(args=(
             pil_image, self.__get_image_key('origin'))
@@ -26,6 +29,11 @@ class S3ImageStorage(BaseStorage):
         if not success:
             raise ImageStoreOriginError('Error while storing origin image')
         return self.__image_url('origin')
+
+    def store_origin_from_file(self, pil_image, origin_size):
+        if not self.is_configured:
+            return
+        return self._store_origin(pil_image, origin_size)
 
     def get_requested_image(self, image_url_or_tuple):
         if not self.is_configured:

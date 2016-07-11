@@ -83,7 +83,10 @@ class S3ImageStorage(BaseStorage):
     def s3_parts(self):
         return urlparse(self.bucket_base_path)
 
-    def configure(self, bucket_base_path, base_path='/'):
+    @classmethod
+    def configure_bucket(cls, bucket_base_path):
+        cls.bucket_base_path = bucket_base_path
+
+    def configure(self, base_path='/'):
         self.base_path = base_path
-        self.bucket_base_path = bucket_base_path
         self.is_configured = True

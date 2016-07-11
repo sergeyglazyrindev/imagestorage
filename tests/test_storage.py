@@ -14,6 +14,9 @@ class TestTask(TestCase):
     @mock.patch('src.imagestorage.storage.s3_store_image')
     def test(self, mocked_task, patched_wheezy, *args):
         mocked_task.return_value = mock.MagicMock()
+        imagestorage.S3ImageStorage.configure_bucket(
+            'https://s3.eu-central-1.amazonaws.com/testimagestorageforpippackage/'
+        )
         storage = imagestorage.S3ImageStorage(101, 'jpg')
         resource_broker.register('s3', 'testimagestorage', aws_access_key_id='dsadasd', aws_secret_access_key='dsasda',
                                  region_name='eu-central-1')
@@ -21,8 +24,7 @@ class TestTask(TestCase):
         resource_broker.register('cache_service', memcache_mocked)
         resource_broker.register('webengine', 'wheezy')
         storage.configure(
-            'https://s3.eu-central-1.amazonaws.com/testimagestorageforpippackage/',
-            '/',
+            '/'
         )
         image = Image.open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg')))
         with mock.patch.object(storage, '_get_image_from_url') as mocked_object:

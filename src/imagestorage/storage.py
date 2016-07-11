@@ -6,6 +6,12 @@ from .tasks import s3_store_image
 from .exceptions import ImageStoreOriginError
 
 
+class Bucket(object):
+
+    def __init__(self, base_path):
+        self.base_path = base_path
+
+
 class S3ImageStorage(BaseStorage):
 
     image_id = None
@@ -13,7 +19,7 @@ class S3ImageStorage(BaseStorage):
     is_configured = False
     domain = None
     image_ext = None
-    bucket_base_path = None
+    bucket = None
 
     def store_origin_from_url(self, image_url, origin_size):
         if not self.is_configured:
@@ -81,11 +87,11 @@ class S3ImageStorage(BaseStorage):
 
     @property
     def s3_parts(self):
-        return urlparse(self.bucket_base_path)
+        return urlparse(self.bucket.base_path)
 
     @classmethod
-    def configure_bucket(cls, bucket_base_path):
-        cls.bucket_base_path = bucket_base_path
+    def use_bucket(cls, bucket):
+        cls.bucket = bucket
 
     def configure(self, base_path='/'):
         self.base_path = base_path

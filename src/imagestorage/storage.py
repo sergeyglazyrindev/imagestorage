@@ -48,7 +48,7 @@ class S3ImageStorage(BaseStorage):
         avail_image_key = image_key + '_avail'
         cache_service = self.mc
         is_available_image = cache_service.get(avail_image_key)
-        if not return_image and is_available_image or self._image_is_available(requesting_image_url):
+        if not return_image and (is_available_image or self._image_is_available(requesting_image_url)):
             if not is_available_image:
                 cache_service.set(avail_image_key, 1)
             return self.webengine.permanent_redirect(requesting_image_url)

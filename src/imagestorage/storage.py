@@ -38,7 +38,7 @@ class S3ImageStorage(BaseStorage):
     def store_origin_from_file(self, pil_image, origin_size):
         return self._store_origin(pil_image, origin_size)
 
-    def get_requested_image(self, image_url_or_tuple):
+    def get_requested_image(self, image_url_or_tuple, return_image=False):
         if isinstance(image_url_or_tuple, (tuple, list)):
             size_tuple = image_url_or_tuple
         else:
@@ -48,7 +48,7 @@ class S3ImageStorage(BaseStorage):
         avail_image_key = image_key + '_avail'
         cache_service = self.mc
         is_available_image = cache_service.get(avail_image_key)
-        if is_available_image or self._image_is_available(requesting_image_url):
+        if not return_image and is_available_image or self._image_is_available(requesting_image_url):
             if not is_available_image:
                 cache_service.set(avail_image_key, 1)
             return self.webengine.permanent_redirect(requesting_image_url)

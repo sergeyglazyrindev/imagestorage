@@ -99,7 +99,7 @@ class S3FileStorage(BaseStorage):
     def store(self, file_):
         storage_key = self._get_storage_key(file_)
         success = s3_store_file.apply_async(args=(
-            file_.read(), storage_key
+            file_.name, storage_key
         )).wait(timeout=10, interval=0.1)
         if not success:
             raise FileStoreError('Error while storing file')

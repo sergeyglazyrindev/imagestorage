@@ -3,7 +3,7 @@ import mock
 from unittest import TestCase
 
 from PIL import Image
-from src.imagestorage.adapters import get_adapter_for_webengine
+from awsstorage.adapters import get_adapter_for_webengine
 
 
 class TestTask(TestCase):
@@ -12,7 +12,7 @@ class TestTask(TestCase):
         fp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test.jpg'))
         self.image = Image.open(fp)
 
-    @mock.patch('src.imagestorage.adapters.wheezy.wheezy.http')
+    @mock.patch('awsstorage.adapters.wheezy.wheezy.http')
     def test_wheezy(self, patched_wheezy):
 
         webengine = get_adapter_for_webengine('wheezy')

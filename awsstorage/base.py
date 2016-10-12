@@ -13,6 +13,9 @@ class BaseStorage():
     mc = ResourceResolver('cache_service')
     webengine = ResourceResolver('webengine')
 
+
+class BaseImageStorage(BaseStorage):
+
     def __init__(self, image_id, image_ext):
         self.image_id = image_id
         self.image_ext = image_ext

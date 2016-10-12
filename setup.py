@@ -11,7 +11,7 @@ def readme():
         return f.read()
 
 setup(
-    name='imagestoragesimplified',
+    name='awsstoragesimplified',
     version='0.1',
     description='Extension to simplify uploading images to s3 and decrease network usage',
     long_description=readme(),
@@ -25,8 +25,7 @@ setup(
     author='Sergey Glazyrin',
     author_email='sergey.glazyrin.dev@gmail.com',
     license='MIT',
-    package_dir={'': 'src'},
-    packages=['imagestorage', ],
+    packages=['awsstorage', ],
     include_package_data=True,
     zip_safe=False,
     extras_require={

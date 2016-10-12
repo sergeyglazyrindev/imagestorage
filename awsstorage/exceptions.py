@@ -2,6 +2,10 @@ class ImageStoreOriginError(Exception):
     pass
 
 
+class FileStoreError(Exception):
+    pass
+
+
 class WebEngineAbsent(Exception):
     pass
 

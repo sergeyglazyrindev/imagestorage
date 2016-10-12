@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.imagestorage.helpers import size_string_to_tuple
+from awsstorage.helpers import size_string_to_tuple
 
 
 class TestHelper(TestCase):

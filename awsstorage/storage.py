@@ -1,9 +1,11 @@
+import string
 import requests
 from urllib.parse import urlunparse, urlparse
 
-from .base import BaseStorage
-from .tasks import s3_store_image
-from .exceptions import ImageStoreOriginError
+from .base import BaseStorage, BaseImageStorage
+from .tasks import s3_store_image, s3_store_file
+from .exceptions import ImageStoreOriginError, FileStoreError
+import random
 
 
 class Bucket(object):
@@ -15,7 +17,7 @@ class Bucket(object):
         self.base_path = base_path
 
 
-class S3ImageStorage(BaseStorage):
+class S3ImageStorage(BaseImageStorage):
 
     image_id = None
     domain = None
@@ -80,6 +82,53 @@ class S3ImageStorage(BaseStorage):
             size_tuple = map(str, filter(None, size_tuple))
             size_tuple_part = 'x'.join(size_tuple)
         return self.bucket.base_path + str(self.image_id) + '/' + size_tuple_part + '.' + self.image_ext
+
+    @property
+    def s3_parts(self):
+        return urlparse(self.bucket.bucket_base_path)
+
+    @classmethod
+    def use_bucket(cls, bucket):
+        cls.bucket = bucket
+
+
+class S3FileStorage(BaseStorage):
+
+    bucket = None
+
+    def store(self, file_):
+        storage_key = self._get_storage_key(file_)
+        success = s3_store_file.apply_async(args=(
+            file_.chunks(), storage_key
+        )).wait(timeout=10, interval=0.1)
+        if not success:
+            raise FileStoreError('Error while storing file')
+        return self._file_url(storage_key)
+
+    def _get_storage_key(self, file_):
+        random_part = ''.join(random.SystemRandom().choice(
+            string.ascii_uppercase + string.digits
+        ) for _ in range(20))
+        file_parts = (
+            random_part[:3],
+            random_part[4:6],
+            random_part[7:9],
+            random_part,
+            file_.name
+        )
+        return '/'.join(file_parts)
+
+    def _file_url(self, storage_key):
+        s3_parts = self.s3_parts
+        path = s3_parts.path
+        return urlunparse((
+            s3_parts.scheme,
+            s3_parts.netloc,
+            path + storage_key,
+            '',
+            '',
+            ''
+        ))
 
     @property
     def s3_parts(self):

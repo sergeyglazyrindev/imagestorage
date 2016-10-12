@@ -5,7 +5,6 @@ from unittest import TestCase
 from PIL import Image
 from awsstorage import storage
 from awsstorage.resources_broker import resource_broker
-from awsstorage.data_models import AwsFileToUpload
 
 
 class BaseImageStorageTestCase(TestCase):
@@ -54,10 +53,6 @@ class TestFileStorage(BaseImageStorageTestCase):
     def test(self, *args):
         storage_ = storage.S3FileStorage()
         storage_.use_bucket(self.bucket)
-        file_ = AwsFileToUpload(
-            open(os.path.join(os.path.dirname(__file__), 'test.jpg'), mode='rb'),
-            'test.jpg', 1
-        )
         self.assertTrue(storage_.store(
-            file_,
+            os.path.join(os.path.dirname(__file__), 'test.jpg'),
         ).endswith('test.jpg'))

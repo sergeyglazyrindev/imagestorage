@@ -1,3 +1,4 @@
+import os
 import string
 import requests
 from urllib.parse import urlunparse, urlparse
@@ -96,16 +97,16 @@ class S3FileStorage(BaseStorage):
 
     bucket = None
 
-    def store(self, file_):
-        storage_key = self._get_storage_key(file_)
+    def store(self, filepath):
+        storage_key = self._get_storage_key(filepath)
         success = s3_store_file.apply_async(args=(
-            file_.name, storage_key
+            filepath, storage_key
         )).wait(timeout=10, interval=0.1)
         if not success:
             raise FileStoreError('Error while storing file')
         return self._file_url(storage_key)
 
-    def _get_storage_key(self, file_):
+    def _get_storage_key(self, filepath):
         random_part = ''.join(random.SystemRandom().choice(
             string.ascii_uppercase + string.digits
         ) for _ in range(20))
@@ -114,7 +115,7 @@ class S3FileStorage(BaseStorage):
             random_part[4:6],
             random_part[7:9],
             random_part,
-            file_.name
+            os.path.basename(filepath)
         )
         return '/'.join(file_parts)
 

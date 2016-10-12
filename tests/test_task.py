@@ -5,7 +5,6 @@ from unittest import TestCase
 from awsstorage.tasks import s3_store_image, s3_store_file
 from awsstorage.resources_broker import resource_broker
 from PIL import Image
-from awsstorage.data_models import AwsFileToUpload
 
 
 class TestTask(TestCase):
@@ -28,9 +27,5 @@ class TestTask(TestCase):
 
     def test_file(self):
 
-        file_ = AwsFileToUpload(
-            open(os.path.join(os.path.dirname(__file__), 'test.jpg'), mode='rb'),
-            'test.jpg', 1
-        )
-        s3_store_file(file_, '/dsadsa.jpg')
+        s3_store_file(os.path.join(os.path.dirname(__file__), 'test.jpg'), 'dasdas')
         self.assertTrue(self.mock_to_compare.upload_file.called)

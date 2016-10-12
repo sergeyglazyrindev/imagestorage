@@ -29,7 +29,7 @@ class TestTask(TestCase):
     def test_file(self):
 
         file_ = AwsFileToUpload(
-            os.path.join(os.path.dirname(__file__), 'test.jpg'),
+            open(os.path.join(os.path.dirname(__file__), 'test.jpg'), mode='rb'),
             'test.jpg', 1
         )
         s3_store_file(file_, '/dsadsa.jpg')

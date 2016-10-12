@@ -20,5 +20,5 @@ def s3_store_file(file_, s3_key):
     if s3_key.startswith('/'):
         s3_key = s3_key[1:]
     _object = ResourceResolver('s3')(s3_key)
-    _object.upload_file(file_)
+    _object.upload_file(file_.read())
     return True

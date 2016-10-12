@@ -55,7 +55,7 @@ class TestFileStorage(BaseImageStorageTestCase):
         storage_ = storage.S3FileStorage()
         storage_.use_bucket(self.bucket)
         file_ = AwsFileToUpload(
-            os.path.join(os.path.dirname(__file__), 'test.jpg'),
+            open(os.path.join(os.path.dirname(__file__), 'test.jpg'), mode='rb'),
             'test.jpg', 1
         )
         self.assertTrue(storage_.store(

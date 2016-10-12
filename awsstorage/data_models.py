@@ -5,5 +5,8 @@ class AwsFileToUpload(object):
         self.name = name
         self.size = size
 
-    def chunks(self):
+    def read(self):
+        return self.stream.read()
+
+    def get_file(self):
         return self.stream

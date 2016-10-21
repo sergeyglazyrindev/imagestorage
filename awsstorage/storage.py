@@ -97,8 +97,8 @@ class S3FileStorage(BaseStorage):
 
     bucket = None
 
-    def store(self, filepath):
-        storage_key = self._get_storage_key(filepath)
+    def store(self, filepath, name):
+        storage_key = self._get_storage_key(filepath, name)
         success = s3_store_file.apply_async(args=(
             filepath, storage_key
         )).wait(timeout=10, interval=0.1)
@@ -106,7 +106,7 @@ class S3FileStorage(BaseStorage):
             raise FileStoreError('Error while storing file')
         return self._file_url(storage_key)
 
-    def _get_storage_key(self, filepath):
+    def _get_storage_key(self, filepath, name):
         random_part = ''.join(random.SystemRandom().choice(
             string.ascii_uppercase + string.digits
         ) for _ in range(20))
@@ -115,7 +115,7 @@ class S3FileStorage(BaseStorage):
             random_part[4:6],
             random_part[7:9],
             random_part,
-            os.path.basename(filepath)
+            name or os.path.basename(filepath)
         )
         return '/'.join(file_parts)
 

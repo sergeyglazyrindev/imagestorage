@@ -32,7 +32,7 @@ class S3ImageStorage(BaseImageStorage):
     def _store_origin(self, pil_image, origin_size):
         self._resize_image(pil_image, origin_size)
         success = s3_store_image.apply_async(args=(
-            pil_image, self.__get_image_key('origin'))
+            pil_image, self.get_image_key('origin'))
         ).wait(timeout=10, interval=0.1)
         if not success:
             raise ImageStoreOriginError('Error while storing origin image')
@@ -47,7 +47,7 @@ class S3ImageStorage(BaseImageStorage):
         else:
             size_tuple = self._get_size_tuple_from_image_url(image_url_or_tuple)
         requesting_image_url = self._image_url(size_tuple)
-        image_key = self.__get_image_key(size_tuple)
+        image_key = self.get_image_key(size_tuple)
         avail_image_key = image_key + '_avail'
         cache_service = self.mc
         is_available_image = cache_service.get(avail_image_key)
@@ -70,13 +70,13 @@ class S3ImageStorage(BaseImageStorage):
         return urlunparse((
             s3_parts.scheme,
             s3_parts.netloc,
-            path + self.__get_image_key(size_tuple),
+            path + self.get_image_key(size_tuple),
             '',
             '',
             ''
         ))
 
-    def __get_image_key(self, size_tuple):
+    def get_image_key(self, size_tuple):
         if size_tuple == 'origin':
             size_tuple_part = size_tuple
         else:
